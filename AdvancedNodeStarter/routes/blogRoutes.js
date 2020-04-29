@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const requireLogin = require('../middlewares/requireLogin');
 const cleanCache = require('../middlewares/cleanCache');
+const stackPrinter = require('../middlewares/stackPrinter');
 
 const Blog = mongoose.model('Blog');
 
@@ -14,11 +15,13 @@ module.exports = app => {
     res.send(blog);
   });
 
-  app.get('/api/blogs', requireLogin, async (req, res) => {
-    const blogs = await Blog.find({ _user: req.user.id }).cache({
-      key: req.user.id
-    });
-
+  app.get('/api/blogs', requireLogin, stackPrinter, async (req, res, next) => {
+    const blogs = await Blog
+      .find({ _user: req.user.id })
+      .cache({
+        key: req.user.id
+      });
+    // stackPrinter(req, res, next)
     res.send(blogs);
   });
 
